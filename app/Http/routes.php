@@ -11,6 +11,8 @@
 |
 */
 
+require_once 'routers/api.php';
+
 $app->get('/', function () use ($app) {
     return $app->welcome();
 });
