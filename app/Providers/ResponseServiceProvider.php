@@ -13,8 +13,6 @@ class ResponseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-       $this->app->bind('App\Interfaces\ResponseInterface', function() {
-            return new \App\Services\ResponseService();
-       });
+       $this->app->bind('App\Interfaces\ResponseInterface', 'App\Services\ResponseService');
     }
 }

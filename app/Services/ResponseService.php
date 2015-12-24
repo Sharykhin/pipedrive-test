@@ -14,6 +14,18 @@ class ResponseService implements ResponseInterface
         'additional_data'=>null
     ];
 
+    public function setErrors($errors)
+    {
+        $this->response['success'] = false;
+        $this->response['errors'] = $errors;
+        return $this;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
+    }
+
     public function json($success, array $data, $errors = null)
     {
         $this->response['success'] = $success;
