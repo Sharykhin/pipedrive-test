@@ -1,6 +1,6 @@
 <?php
 
-$app->post('/organizationRelationships', [
+$app->post('/', [
     'as'=>'organizationRelationships.create',
     'uses' => 'OrganizationRelationshipsController@create'
 ]);

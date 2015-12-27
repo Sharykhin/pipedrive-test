@@ -38,6 +38,13 @@ class OrganizationRelationshipsController extends ApiController
      */
     public function create(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'org_name' => 'required|max:255',
+            'daughters' => 'required|array'
+        ]);
 
+        if ($validator->fails()) {
+            return $this->failResponse($validator->errors());
+        }
     }
 }
