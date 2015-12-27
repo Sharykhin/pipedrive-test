@@ -63,6 +63,10 @@ $app->singleton(
 //     // Laravel\Lumen\Http\Middleware\VerifyCsrfToken::class,
 // ]);
 
+$app->middleware([
+    App\Http\Middleware\HeadersMiddleware::class
+]);
+
 // $app->routeMiddleware([
 
 // ]);
@@ -80,7 +84,7 @@ $app->singleton(
 
 // $app->register(App\Providers\AppServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
-$app->register(App\Providers\ResponseServiceProvider::class);
+ $app->register(App\Providers\PipeDriveHttpClientServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------
@@ -93,8 +97,6 @@ $app->register(App\Providers\ResponseServiceProvider::class);
 |
 */
 
-$app->group(['namespace' => 'App\Http\Controllers'], function ($app) {
-    require __DIR__.'/../app/Http/routes.php';
-});
+require __DIR__.'/../app/Http/routes.php';
 
 return $app;

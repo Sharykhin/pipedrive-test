@@ -2,14 +2,161 @@
 
 namespace  App\Http\Controllers;
 
+use App\Models\Organization;
+use Illuminate\Http\Request;
+use App\Services\PipeDrive\PipeDriveOrganization;
+use Validator;
+use DB;
+
+/**
+ * Class OrganizationsController
+ * @package App\Http\Controllers
+ */
 class OrganizationsController extends ApiController
 {
+    private $orgService;
+
+    public function __construct(PipeDriveOrganization $orgService)
+    {
+        $this->orgService = $orgService;
+    }
+
+    /**
+     * return all organizations
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
-        $res = $this->client->request('GET',
-            'https://api.pipedrive.com/v1/organizations?start=0&api_token=750ca8539cec9e4e1a534276cea3957403588e2d', [
-                'headers' => ['Content-Type' => 'application/json'],
-            ]);
-        var_dump(json_decode($res->getBody()->getContents(), true));
+        $organizations = Organization::all();
+        return $this->successResponse($organizations);
+    }
+
+    /**
+     * Return organization by ID
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getOne($id)
+    {
+        $organization  = Organization::find($id);
+        if (!$organization) {
+            return $this->modelNotFoundResponse('Organization not found.');
+        }
+        return $this->successResponse($organization);
+    }
+
+    /**
+     * Create a new organization
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function create(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|unique:organizations|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->failResponse($validator->errors());
+        }
+
+        try {
+            DB::beginTransaction();
+                $organization = Organization::create($request->all());
+                $this->orgService->create($request->all());
+            DB::commit();
+        } catch(\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+
+        return $this->successResponse($organization);
+    }
+
+    /**
+     * Update organization by ID. Pay attention that name is unique.
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, $id)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'name' => 'unique:organizations|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->failResponse($validator->errors());
+        }
+
+        try {
+            DB::beginTransaction();
+            $organization  = Organization::find($id);
+            $name = $organization->name;
+            $organization->name = $request->input('name');
+            $organization->save();
+            $result = $this->orgService->findOne($name);
+            if ($result) {
+                $this->orgService->update($request->all(), $result['id']);
+            }
+            DB::commit();
+        } catch(\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+
+
+        return $this->successResponse($organization);
+    }
+
+    /**
+     * Remove one organization by ID
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function delete($id)
+    {
+        $organization  = Organization::find($id);
+        if (!$organization) {
+            return $this->modelNotFoundResponse('Organization not found.');
+        }
+        try {
+            DB::beginTransaction();
+            $name = $organization->name;
+            $result = $this->orgService->findOne($name);
+            if ($result) {
+                $this->orgService->delete($result['id']);
+            }
+            $organization->delete();
+            DB::commit();
+        } catch(\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+        return $this->successResponse(['id'=>$organization->id]);
+    }
+
+    public function find()
+    {
+        $organizationsService = app('App\Services\PipeDrive\PipeDriveOrganization');
+
+        $names = ["John Travolta's company", "Piter Parker's company"];
+        $organizations = $organizationsService->find("John Travolta's company");
+
+        $organizationsNotExist = [];
+        $organizationsExist = [];
+        foreach($organizations as $index=>$organization) {
+            if (is_null($organization['data'])) {
+                $organizationsNotExist[] = $names[$index] . ' does not exist';
+            } else {
+                $organizationsExist = array_merge($organizationsExist, $organization['data']);
+            }
+        }
+        if (sizeof($organizationsNotExist) > 0) {
+            return $this->failResponse($organizationsNotExist);
+        }
+
+        return $this->successResponse($organizationsExist);
     }
 }

@@ -10,9 +10,10 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
+$app->group(['namespace' => 'App\Http\Controllers', 'prefix' => '/api/v1'], function ($app) {
+    require __DIR__.'/routers/api.php';
+});
 
-require_once 'routers/api.php';
-
-$app->get('/', function () use ($app) {
-    return $app->welcome();
+$app->group(['namespace' => 'App\Http\Controllers', 'prefix' => '/api/v1/organizations'], function ($app) {
+    require __DIR__.'/routers/organizations.php';
 });

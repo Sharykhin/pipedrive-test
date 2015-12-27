@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Interfaces\ResponseInterface;
-use GuzzleHttp\Client;
+use App\Traits\ResponseJsonTrait;
 
 /**
  * Class ApiController
@@ -11,26 +10,11 @@ use GuzzleHttp\Client;
  */
 class ApiController extends Controller
 {
-    /** @var ResponseInterface  */
-    protected $response;
+    use ResponseJsonTrait;
 
-    protected $client;
-
-    /**
-     * @param ResponseInterface $response
-     * @param Client $client
-     */
-    public function __construct(ResponseInterface $response, Client $client)
-    {
-        $this->response = $response;
-        $this->client = $client;
-    }
-
-    /**
-     * @return mixed
-     */
     public function test()
     {
-        return $this->response->json(true, ['message'=>'api works']);
+        return $this->successResponse(['user_id'=>12]);
     }
+
 }
