@@ -10,8 +10,9 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
-define('API_V1_URL','/api/v1');
+if (!defined('API_V1_URL')) {
+    define('API_V1_URL','/api/v1');
+}
 
 $app->get(API_V1_URL . '/test',function () use ($app) {
     return ['success'=>true, 'message'=>'api works'];

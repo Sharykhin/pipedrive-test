@@ -41,7 +41,7 @@ class OrganizationRelationshipsController extends ApiController
 
     public function index()
     {
-        
+
     }
 
     /*
