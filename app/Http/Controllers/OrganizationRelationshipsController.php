@@ -4,6 +4,7 @@ namespace  App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\PipeDrive\PipeDriveOrganization;
+use App\Services\OrganizationsService;
 use Validator;
 use DB;
 
@@ -14,10 +15,13 @@ use DB;
 class OrganizationRelationshipsController extends ApiController
 {
 
+    private $orgPipeDriveService;
+
     private $orgService;
 
-    public function __construct(PipeDriveOrganization $orgService)
+    public function __construct(PipeDriveOrganization $orgPipeDriveService, OrganizationsService $orgService)
     {
+        $this->orgPipeDriveService = $orgPipeDriveService;
         $this->orgService = $orgService;
     }
 
@@ -50,17 +54,26 @@ class OrganizationRelationshipsController extends ApiController
             return $this->failResponse($validator->errors());
         }
 
-        $companies = [];
+        $orgs = [];
         $pipeDriveRelationships = [];
         $localRelationships = [];
-        //Step one: go through the data and create three arrays
-        array_push($companies, $request->input('org_name'));
-        $this->parseRelationships($request->all(), $companies, $pipeDriveRelationships, $localRelationships);
-        die(var_dump($localRelationships));
+        // Step one: go through the data and create three arrays
+        array_push($orgs, $request->input('org_name'));
+        $this->parseRelationships($request->all(), $orgs, $pipeDriveRelationships, $localRelationships);
+        // Step two: check if all $orgs exist
+        $organizations = $this->orgPipeDriveService->find($orgs);
 
+        $organizationsNotExist = $this->orgService->getNonExistingOrganizations($organizations, $orgs);
+        $organizationsExist = $this->orgService->getExistingOrganizations($organizations);
+
+        if (sizeof($organizationsNotExist) > 0) {
+            return $this->failResponse($organizationsNotExist, [
+                'error_info'=>'Use the following request: POST /api/v1/organizations to create appropriate organization'
+            ]);
+        }
     }
 
-    private function parseRelationships($data, &$companies, &$pipeDriveRelationships, &$localRelationships)
+    private function parseRelationships($data, &$orgs, &$pipeDriveRelationships, &$localRelationships)
     {
 
         if (isset($data['daughters']) && !empty($data['daughters'])) {
@@ -79,10 +92,10 @@ class OrganizationRelationshipsController extends ApiController
                     'linked_org_name'=>$daughterData['org_name']
                 ]);
 
-                array_push($companies, $daughterData['org_name']);
+                array_push($orgs, $daughterData['org_name']);
 
                 if (isset($daughterData['daughters']) && !empty($daughterData['daughters'])) {
-                    $this->parseRelationships($daughterData,  $companies, $pipeDriveRelationships, $localRelationships);
+                    $this->parseRelationships($daughterData,  $orgs, $pipeDriveRelationships, $localRelationships);
                 }
 
             }

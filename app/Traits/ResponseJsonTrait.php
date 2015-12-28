@@ -41,14 +41,16 @@ trait ResponseJsonTrait
         return $this->response();
     }
 
-    public function successResponse($data)
+    public function successResponse($data, array $additionalData = [])
     {
+        $this->responseData = array_merge_recursive($this->responseData, $additionalData);
         $this->applyResponseData(true, $data, null);
         return $this->response();
     }
 
-    public function failResponse($error)
+    public function failResponse($error, array $additionalData = [])
     {
+        $this->responseData = array_merge_recursive($this->responseData, $additionalData);
         $this->applyResponseData(false, null, $error);
         return $this->response();
     }
