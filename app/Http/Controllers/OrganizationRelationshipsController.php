@@ -39,6 +39,11 @@ class OrganizationRelationshipsController extends ApiController
         $this->orgRelPipeDriveService = $orgRelPipeDriveService;
     }
 
+    public function index()
+    {
+        
+    }
+
     /*
     {
         "org_name": "Paradise Island",
