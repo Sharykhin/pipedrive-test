@@ -119,17 +119,17 @@ class OrganizationRelationshipsController extends ApiController
             DB::rollBack();
             return $this->failResponse($e->getMessage());
         }
+        //Prepare response of relationships
         $responseRelationship = [];
         foreach($result['data'] as $relationshipData) {
             $responseRelationship[] = $relationshipData['data'];
         }
         return $this->successResponse($responseRelationship);
 
-
     }
 
     /**
-     * Delete all organizationRelationships from local database and pipedrive
+     * Delete all organizationRelationships from local database and PIPEDRIVE
      * @return \Illuminate\Http\JsonResponse
      */
     public function deleteAll()
@@ -170,7 +170,6 @@ class OrganizationRelationshipsController extends ApiController
      */
     private function parseRelationships($data, &$orgs, &$pipeDriveRelationships, &$localRelationships)
     {
-
         if (isset($data['daughters']) && !empty($data['daughters'])) {
             foreach($data['daughters'] as $daughterData) {
                 if (!isset($daughterData['org_name'])) {
