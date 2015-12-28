@@ -3,17 +3,19 @@
 namespace App\Services;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
-use GuzzleHttp\Pool;
+use Psr\Http\Message\ResponseInterface;
+use GuzzleHttp\Exception\RequestException;
 use App\Interfaces\PipeDriveHttpClientInterface;
 use GuzzleHttp\Promise;
 
+/**
+ * Class PipeDriveHttpClient
+ * @package App\Services
+ */
 class PipeDriveHttpClient implements  PipeDriveHttpClientInterface
 {
     const TOKEN = '750ca8539cec9e4e1a534276cea3957403588e2d';
     const PIPEDRIVE_API = 'https://api.pipedrive.com/v1/';
-
-    private $endpoint = null;
 
     private $defaultProperties = [
         'headers' => ['Content-Type' => 'application/json'],
@@ -33,42 +35,31 @@ class PipeDriveHttpClient implements  PipeDriveHttpClientInterface
         ]);
     }
 
-    public function setUrl($url)
-    {
-
-    }
-
+    /**
+     * Make a single request to PIPEDRIVE API
+     * @param $endpoint
+     * @param array $properties
+     * @param string $method
+     * @return mixed
+     */
     public function request($endpoint, array $properties = [], $method = 'GET')
     {
         $requestProperties = array_merge_recursive($this->defaultProperties, $properties);
         return $this->client->request($method, $endpoint, $requestProperties);
     }
 
-    public function poolRequests(array $endpoints)
+    /**
+     * @param array $requestConfigs
+     * @return array
+     * @throws \Exception
+     */
+    public function multipleRequests(array $requestConfigs)
     {
-        $requests = function ($total) use ($endpoints) {
-            $uri = self::PIPEDRIVE_API;
-            for ($i = 0; $i < $total; $i++) {
-                yield new Request('GET', $uri . $endpoints[$i]);
-            }
-        };
-
-        $pool = new Pool($this->client, $requests(sizeof($endpoints)), [
-            'concurrency' => 5,
-            'fulfilled' => function ($response, $index) {
-                // this is delivered each successful response
-            },
-            'rejected' => function ($reason, $index) {
-                // this is delivered each failed request
-            },
-        ]);
-    }
-
-    public function getMultipleRequests(array $requestConfigs)
-    {
-        $required = ['method','url'];
+        $required = ['method', 'url'];
         // Initiate each request but do not block
         $promises = [];
+        $errors = [];
+        $data = [];
         foreach($requestConfigs as $index => $requestConfig) {
             if (count(array_intersect_key(array_flip($required), $requestConfig)) !== count($required)) {
                 throw new \Exception('Each request configuration in getMultipleRequests method must have url and method properties');
@@ -76,18 +67,23 @@ class PipeDriveHttpClient implements  PipeDriveHttpClientInterface
             $requestProperties = array_merge_recursive($this->defaultProperties, $requestConfig);
             $promises[$index] = $this->client->requestAsync(
                 $requestProperties['method'],
-                self::PIPEDRIVE_API . $requestConfig['url'] . '?' . http_build_query($requestProperties['query']),
+                $requestConfig['url'] . '?' . http_build_query($requestProperties['query']),
                 $requestProperties
             );
+
+            $promises[$index]->then(function (ResponseInterface $res) use ($index, &$data) {
+                $data[$index] = json_decode($res->getBody()->getContents(), true);
+            }, function (RequestException $e) use (&$errors) {
+                $body = json_decode($e->getResponse()->getBody(), true);
+                $errors[] = [
+                    'error'=>$body['error'],
+                    'error_info' => $body['error_info'],
+                    'request_body' => json_decode($e->getRequest()->getBody(),true)
+                    ];
+            })->wait();
         }
 
-        // Wait on all of the requests to complete.
-        $results = Promise\unwrap($promises);
-        $data = [];
-        foreach($results as $index => $result) {
-            $data[$index] = json_decode($result->getBody()->getContents(), true);
-        }
-        return $data;
+        return ['data' => $data, 'errors' => $errors];
     }
 
 

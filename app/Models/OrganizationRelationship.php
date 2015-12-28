@@ -8,6 +8,8 @@ class OrganizationRelationship extends Model
 {
     protected $fillable = array('org_id', 'type', 'linked_org_id');
 
+    public $timestamps = false;
+
     public function organization()
     {
         return $this->belongsTo('App\Models\Organization', 'org_id', 'id');

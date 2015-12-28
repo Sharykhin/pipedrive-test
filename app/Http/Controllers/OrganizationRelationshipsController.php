@@ -8,6 +8,7 @@ use App\Models\Organization;
 use App\Models\OrganizationRelationship;
 use App\Services\OrganizationsService;
 use App\Services\OrganizationRelationshipsService;
+use App\Services\PipeDrive\PipeDriveOrganizationRelationships;
 use Validator;
 use DB;
 
@@ -20,6 +21,8 @@ class OrganizationRelationshipsController extends ApiController
 
     private $orgPipeDriveService;
 
+    private $orgRelPipeDriveService;
+
     private $orgService;
 
     private $orgRelationshipsService;
@@ -27,11 +30,13 @@ class OrganizationRelationshipsController extends ApiController
     public function __construct(
         PipeDriveOrganization $orgPipeDriveService,
         OrganizationsService $orgService,
-        OrganizationRelationshipsService $orgRelationshipsService)
+        OrganizationRelationshipsService $orgRelationshipsService,
+        PipeDriveOrganizationRelationships $orgRelPipeDriveService)
     {
         $this->orgPipeDriveService = $orgPipeDriveService;
         $this->orgService = $orgService;
         $this->orgRelationshipsService = $orgRelationshipsService;
+        $this->orgRelPipeDriveService = $orgRelPipeDriveService;
     }
 
     /*
@@ -39,7 +44,7 @@ class OrganizationRelationshipsController extends ApiController
         "org_name": "Paradise Island",
         "daughters": [
             {
-                "org_name:": "Banana tree",
+                "org_name": "Banana tree",
                 "daughters": [
                     {"org_name": "Yellow Banana"},
                     {"org_name": "Brown Banana"},
@@ -52,6 +57,11 @@ class OrganizationRelationshipsController extends ApiController
         ]
     }
      */
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
+     */
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -62,7 +72,7 @@ class OrganizationRelationshipsController extends ApiController
         if ($validator->fails()) {
             return $this->failResponse($validator->errors());
         }
-        //OrganizationRelationship::with('organization', 'linked')->get()->toArray();
+        // initialize arrays for organization and relationships for storing in local database and pipedrive
         $orgs = [];
         $pipeDriveRelationships = [];
         $localRelationships = [];
@@ -70,28 +80,94 @@ class OrganizationRelationshipsController extends ApiController
         array_push($orgs, $request->input('org_name'));
         $this->parseRelationships($request->all(), $orgs, $pipeDriveRelationships, $localRelationships);
         // Step two: check if all $orgs exist
-        $organizations = $this->orgPipeDriveService->find($orgs);
-
+        $searchResult = $this->orgPipeDriveService->find($orgs);
+        if (!empty($searchResult['errors'])) {
+            return $this->failResponse($searchResult['errors']);
+        }
+        $organizations = $searchResult['data'];
         $organizationsNotExist = $this->orgService->getNonExistingOrganizations($organizations, $orgs);
         $organizationsExist = $this->orgService->getExistingOrganizations($organizations);
 
         if (sizeof($organizationsNotExist) > 0) {
-            return $this->failResponse($organizationsNotExist, [
+            return $this->failResponse('Organizations: ' . implode(',', $organizationsNotExist) . ' don\'t exist', [
                 'error_info'=>'Use the following request: POST /api/v1/organizations to create appropriate organization'
             ]);
         }
         // Step three: get all organizations by their names
         // We get an arrat with the following format: [id=>name]
         $localOrgs = Organization::findByNames($orgs);
-        $localRelationships = $this->orgRelationshipsService->mapRelationshipData($localOrgs, $localRelationships);
-        //TODO: Performance notice!
-        die('wow wow wow. stop here please');
-        foreach($localRelationships as $localRelationship) {
-            OrganizationRelationship::create($localRelationship);
+        $nonExistingOrgs = array_diff($orgs, $localOrgs);
+        if (!empty($nonExistingOrgs)) {
+            return $this->failResponse('Organizations: ' . implode(',', $nonExistingOrgs) . ' don\'t exist', [
+                'error_info'=>'Use the following request: POST /api/v1/organizations to create appropriate organization'
+            ]);
         }
+        $localRelationships = $this->orgRelationshipsService->mapRelationshipData($localOrgs, $localRelationships, ['org_id','linked_org_id']);
+        $pipeDriveRelationships = $this->orgRelationshipsService->mapRelationshipData($organizationsExist, $pipeDriveRelationships, ['org_id','rel_owner_org_id','rel_linked_org_id']);
+        //TODO: Performance notice!
+        try {
+            DB::beginTransaction();
+            $result = $this->orgRelPipeDriveService->create($pipeDriveRelationships);
+            if (!empty($result['errors'])) {
+                return $this->failResponse($result['errors']);
+            }
+            foreach($localRelationships as $localRelationship) {
+                OrganizationRelationship::create($localRelationship);
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+        $responseRelationship = [];
+        foreach($result['data'] as $relationshipData) {
+            $responseRelationship[] = $relationshipData['data'];
+        }
+        return $this->successResponse($responseRelationship);
+
 
     }
 
+    /**
+     * Delete all organizationRelationships from local database and pipedrive
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deleteAll()
+    {
+        try {
+            DB::beginTransaction();
+            $relationShips = OrganizationRelationship::all();
+            foreach($relationShips as $relationShip) {
+                $relationShip->delete();
+            }
+            $organizations = $this->orgPipeDriveService->getAll();
+            if ($organizations['success'] === true && !empty($organizations['data'])) {
+                foreach($organizations['data'] as $organization) {
+                    $relationShips =  $this->orgRelPipeDriveService->getAll($organization['id']);
+                    if ($relationShips['success'] === true && !empty($relationShips['data'])) {
+                        foreach($relationShips['data'] as $relationShip) {
+                            $this->orgRelPipeDriveService->delete($relationShip['id']);
+                        }
+                    }
+                }
+            }
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+
+        return $this->successResponse(['message'=>'All organization relationships were deleted']);
+    }
+
+    /**
+     * Iterate over post data and create different array for storing data in PIPEDRIVE and local database
+     * @param $data
+     * @param $orgs
+     * @param $pipeDriveRelationships
+     * @param $localRelationships
+     * @throws \Exception
+     */
     private function parseRelationships($data, &$orgs, &$pipeDriveRelationships, &$localRelationships)
     {
 
@@ -101,10 +177,10 @@ class OrganizationRelationshipsController extends ApiController
                     throw new \Exception('Daughter object must have org_name');
                 }
                 array_push($pipeDriveRelationships, [
-                    'org_name' => $data['org_name'],
+                    'org_id' => $data['org_name'],
                     'type'=>'parent',
-                    'rel_owner_org_name' => $data['org_name'],
-                    'rel_linked_org_name' => $daughterData['org_name']
+                    'rel_owner_org_id' => $data['org_name'],
+                    'rel_linked_org_id' => $daughterData['org_name']
                 ]);
                 array_push($localRelationships, [
                     'org_id' => $data['org_name'],

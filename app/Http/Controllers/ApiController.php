@@ -11,10 +11,4 @@ use App\Traits\ResponseJsonTrait;
 class ApiController extends Controller
 {
     use ResponseJsonTrait;
-
-    public function test()
-    {
-        return $this->successResponse(['user_id'=>12]);
-    }
-
 }

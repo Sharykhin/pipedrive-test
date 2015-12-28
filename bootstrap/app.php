@@ -55,21 +55,9 @@ $app->singleton(
 |
 */
 
-// $app->middleware([
-//     // Illuminate\Cookie\Middleware\EncryptCookies::class,
-//     // Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
-//     // Illuminate\Session\Middleware\StartSession::class,
-//     // Illuminate\View\Middleware\ShareErrorsFromSession::class,
-//     // Laravel\Lumen\Http\Middleware\VerifyCsrfToken::class,
-// ]);
-
 $app->middleware([
     App\Http\Middleware\HeadersMiddleware::class
 ]);
-
-// $app->routeMiddleware([
-
-// ]);
 
 /*
 |--------------------------------------------------------------------------
@@ -82,9 +70,7 @@ $app->middleware([
 |
 */
 
-// $app->register(App\Providers\AppServiceProvider::class);
-// $app->register(App\Providers\EventServiceProvider::class);
- $app->register(App\Providers\PipeDriveHttpClientServiceProvider::class);
+$app->register(App\Providers\PipeDriveHttpClientServiceProvider::class);
 
 /*
 |--------------------------------------------------------------------------

@@ -136,4 +136,27 @@ class OrganizationsController extends ApiController
         }
         return $this->successResponse(['id'=>$organization->id]);
     }
+
+    public function deleteAll()
+    {
+        try {
+            DB::beginTransaction();
+            $organizations = Organization::all();
+            foreach($organizations as $organization) {
+                $organization->delete();
+            }
+            $organizations = $this->orgService->getAll();
+            if ($organizations['success'] === true && !empty($organizations['data'])) {
+                foreach($organizations['data'] as $organization) {
+                    $this->orgService->delete($organization['id']);
+                }
+            }
+            DB::commit();
+        } catch(\Exception $e) {
+            DB::rollBack();
+            return $this->failResponse($e->getMessage());
+        }
+
+        return $this->successResponse(['message'=>'All organization were deleted']);
+    }
 }

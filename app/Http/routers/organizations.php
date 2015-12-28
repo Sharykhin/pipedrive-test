@@ -24,3 +24,8 @@ $app->delete('/{id}',[
     'as' => 'organizations.delete',
     'uses' => 'OrganizationsController@delete'
 ]);
+
+$app->delete('/', [
+    'as' => 'organizations.deleteAll',
+    'uses' => 'OrganizationsController@deleteAll'
+]);

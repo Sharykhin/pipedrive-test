@@ -11,19 +11,21 @@ class OrganizationRelationshipsService
 
     /**
      * Replace all names by their appropriate ids
-     * @param $localOrgs
-     * @param $localRelationships
+     * @param $currentOrgs
+     * @param $orgsRelationships
+     * @param array $mapKeys
      * @return mixed
      */
-    public function mapRelationshipData($localOrgs, $localRelationships)
+    public function mapRelationshipData($currentOrgs, $orgsRelationships, array $mapKeys)
     {
         //TODO: Performance notice!
         // $localOrgs has a simple format: id => name, that's why array_search in this
         // particular case will be a quite lite operation.
-        foreach($localRelationships as &$relationshipItem) {
-            $relationshipItem['org_id'] = array_search($relationshipItem['org_id'], $localOrgs);
-            $relationshipItem['linked_org_id'] = array_search($relationshipItem['linked_org_id'], $localOrgs);
+        foreach($orgsRelationships as &$relationshipItem) {
+            foreach($mapKeys as $key) {
+                $relationshipItem[$key] = array_search($relationshipItem[$key], $currentOrgs);
+            }
         }
-        return $localRelationships;
+        return $orgsRelationships;
     }
 }

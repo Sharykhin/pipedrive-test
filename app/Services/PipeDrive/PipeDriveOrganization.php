@@ -27,17 +27,22 @@ class PipeDriveOrganization
      */
     public function create($data)
     {
-        $response = $this->client->request(self::ENDPOINT,
-            ['json' =>
-                ['name' => $data['name']]
-            ], 'POST');
+        $exist = $this->findOne($data['name']);
+        if (!$exist) {
+            $response = $this->client->request(self::ENDPOINT,
+                ['json' =>
+                    ['name' => $data['name']]
+                ], 'POST');
 
-        $data = json_decode($response->getBody()->getContents(), true);
-        if ($data['success'] === true) {
-            return true;
-        } else {
-            throw new \Exception($data['error']);
+            $data = json_decode($response->getBody()->getContents(), true);
+            if ($data['success'] === true) {
+                return $data['data'];
+            } else {
+                throw new \Exception($data['error']);
+            }
         }
+
+        return true;
     }
 
     /**
@@ -130,9 +135,15 @@ class PipeDriveOrganization
                     ]
                 ];
             }
-            $results = $this->client->getMultipleRequests($requestConfig);
+            $results = $this->client->multipleRequests($requestConfig);
 
             return $results;
         }
+    }
+
+    public function getAll()
+    {
+        $result = $this->client->request(self::ENDPOINT);
+        return json_decode($result->getBody()->getContents(), true);
     }
 }

@@ -20,7 +20,10 @@ class OrganizationsService
                 $organizationsExist = array_merge($organizationsExist, $organization['data']);
             }
         }
-        return $organizationsExist;
+        return array_reduce($organizationsExist, function(&$newData, $orgItem) {
+            $newData[$orgItem['id']] = $orgItem['name'];
+            return $newData;
+        }, []);
     }
 
     /**
@@ -33,7 +36,7 @@ class OrganizationsService
         $organizationsNotExist = [];
         foreach($organizations as $index=>$organization) {
             if (is_null($organization['data'])) {
-                $organizationsNotExist[] = $names[$index] . ' does not exist';
+                $organizationsNotExist[] = $names[$index];
             }
         }
         return $organizationsNotExist;
