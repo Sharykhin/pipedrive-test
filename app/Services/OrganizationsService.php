@@ -2,9 +2,16 @@
 
 namespace App\Services;
 
+/**
+ * Class OrganizationsService
+ * @package App\Services
+ */
 class OrganizationsService
 {
-
+    /**
+     * @param $organizations
+     * @return array
+     */
     public function getExistingOrganizations($organizations)
     {
         $organizationsExist = [];
@@ -16,6 +23,11 @@ class OrganizationsService
         return $organizationsExist;
     }
 
+    /**
+     * @param $organizations
+     * @param $names
+     * @return array
+     */
     public function getNonExistingOrganizations($organizations, $names)
     {
         $organizationsNotExist = [];

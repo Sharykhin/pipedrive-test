@@ -136,27 +136,4 @@ class OrganizationsController extends ApiController
         }
         return $this->successResponse(['id'=>$organization->id]);
     }
-
-    public function find()
-    {
-        $organizationsService = app('App\Services\PipeDrive\PipeDriveOrganization');
-
-        $names = ["John Travolta's company", "Piter Parker's company"];
-        $organizations = $organizationsService->find("John Travolta's company");
-
-        $organizationsNotExist = [];
-        $organizationsExist = [];
-        foreach($organizations as $index=>$organization) {
-            if (is_null($organization['data'])) {
-                $organizationsNotExist[] = $names[$index] . ' does not exist';
-            } else {
-                $organizationsExist = array_merge($organizationsExist, $organization['data']);
-            }
-        }
-        if (sizeof($organizationsNotExist) > 0) {
-            return $this->failResponse($organizationsNotExist);
-        }
-
-        return $this->successResponse($organizationsExist);
-    }
 }

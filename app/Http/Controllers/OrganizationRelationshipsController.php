@@ -4,7 +4,10 @@ namespace  App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\PipeDrive\PipeDriveOrganization;
+use App\Models\Organization;
+use App\Models\OrganizationRelationship;
 use App\Services\OrganizationsService;
+use App\Services\OrganizationRelationshipsService;
 use Validator;
 use DB;
 
@@ -19,10 +22,16 @@ class OrganizationRelationshipsController extends ApiController
 
     private $orgService;
 
-    public function __construct(PipeDriveOrganization $orgPipeDriveService, OrganizationsService $orgService)
+    private $orgRelationshipsService;
+
+    public function __construct(
+        PipeDriveOrganization $orgPipeDriveService,
+        OrganizationsService $orgService,
+        OrganizationRelationshipsService $orgRelationshipsService)
     {
         $this->orgPipeDriveService = $orgPipeDriveService;
         $this->orgService = $orgService;
+        $this->orgRelationshipsService = $orgRelationshipsService;
     }
 
     /*
@@ -53,7 +62,7 @@ class OrganizationRelationshipsController extends ApiController
         if ($validator->fails()) {
             return $this->failResponse($validator->errors());
         }
-
+        //OrganizationRelationship::with('organization', 'linked')->get()->toArray();
         $orgs = [];
         $pipeDriveRelationships = [];
         $localRelationships = [];
@@ -71,6 +80,16 @@ class OrganizationRelationshipsController extends ApiController
                 'error_info'=>'Use the following request: POST /api/v1/organizations to create appropriate organization'
             ]);
         }
+        // Step three: get all organizations by their names
+        // We get an arrat with the following format: [id=>name]
+        $localOrgs = Organization::findByNames($orgs);
+        $localRelationships = $this->orgRelationshipsService->mapRelationshipData($localOrgs, $localRelationships);
+        //TODO: Performance notice!
+        die('wow wow wow. stop here please');
+        foreach($localRelationships as $localRelationship) {
+            OrganizationRelationship::create($localRelationship);
+        }
+
     }
 
     private function parseRelationships($data, &$orgs, &$pipeDriveRelationships, &$localRelationships)
@@ -84,12 +103,13 @@ class OrganizationRelationshipsController extends ApiController
                 array_push($pipeDriveRelationships, [
                     'org_name' => $data['org_name'],
                     'type'=>'parent',
-                    'linked_org_name'=>$daughterData['org_name']
+                    'rel_owner_org_name' => $data['org_name'],
+                    'rel_linked_org_name' => $daughterData['org_name']
                 ]);
                 array_push($localRelationships, [
-                    'org_name' => $data['org_name'],
+                    'org_id' => $data['org_name'],
                     'type'=>'parent',
-                    'linked_org_name'=>$daughterData['org_name']
+                    'linked_org_id'=>$daughterData['org_name']
                 ]);
 
                 array_push($orgs, $daughterData['org_name']);

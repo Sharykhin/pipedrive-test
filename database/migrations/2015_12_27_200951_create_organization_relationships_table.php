@@ -18,7 +18,6 @@ class CreateOrganizationRelationshipsTable extends Migration
             $table->integer('org_id')->unsigned();
             $table->enum('type',['parent','related']);
             $table->integer('linked_org_id')->unsigned();
-            $table->timestamps();
         });
 
         Schema::table('organization_relationships', function($table) {
