@@ -15,7 +15,7 @@ class OrganizationRelationshipsTest extends TestCase
         $this->call('POST','/api/v1/organizations', ['name' => 'Green Banana']);
         $this->call('POST','/api/v1/organizations', ['name' => 'Coca-Cola']);
 
-        $response = $this->call('POST', '/api/v1/organizationRelationships', [
+        $data = [
             'org_name' => 'Paradise Island',
             'daughters' => [
                 [
@@ -36,11 +36,16 @@ class OrganizationRelationshipsTest extends TestCase
                     'org_name' => 'Coca-Cola'
                 ]
             ]
-        ]);
+        ];
+        $response = $this->call('POST',
+            '/api/v1/organizationRelationships',
+            [],[],[], ['CONTENT_TYPE' => 'application/json'],json_encode($data));
+
         $responseContent = json_decode($response->content(), true);
+
         $this->assertTrue($responseContent['success']);
         $this->assertNull($responseContent['error']);
-        $this->assertCount(5, sizeof($responseContent['data']));
+        $this->assertCount(5, $responseContent['data']);
         foreach($responseContent['data'] as $dataItem) {
             $this->assertArrayHasKey('id', $dataItem);
             $this->assertArrayHasKey('type', $dataItem);

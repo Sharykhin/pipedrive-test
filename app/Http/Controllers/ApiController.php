@@ -19,4 +19,5 @@ class ApiController extends Controller
         App::make('App\Http\Controllers\OrganizationRelationshipsController')->deleteAll();
         return $this->successResponse(['message' => 'All data has been removed']);
     }
+
 }
