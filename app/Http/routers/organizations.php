@@ -11,11 +11,13 @@ $app->get('/{id}',[
 ]);
 
 $app->post('/',[
+    'middleware' => 'accept',
     'as' => 'organizations.create',
     'uses' => 'OrganizationsController@create'
 ]);
 
 $app->put('/{id}',[
+    'middleware' => 'accept',
     'as' => 'organizations.update',
     'uses' => 'OrganizationsController@update'
 ]);

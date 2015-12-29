@@ -7,7 +7,7 @@ use Illuminate\Http\JsonResponse;
 
 use App\Traits\ResponseJsonTrait;
 
-class HeadersMiddleware
+class AcceptMiddleware
 {
     use ResponseJsonTrait;
     /**
@@ -20,8 +20,9 @@ class HeadersMiddleware
     public function handle($request, Closure $next)
     {
         if (env('APP_DEBUG') === false) {
-            if (strpos(mb_strtolower($request->header('Content-Type')), 'application/json') !== 0) {
-                return $this->setStatusCode(400)->failResponse('Header: Content-Type must be specified as application/json');
+
+            if (strpos(mb_strtolower($request->header('Accept')), 'application/json') !== 0) {
+                return $this->setStatusCode(400)->failResponse('Header: Accept must be specified as application/json');
             }
         }
 

@@ -1,6 +1,7 @@
 <?php
 
 $app->post('/', [
+    'middleware' => 'accept',
     'as'=>'organizationRelationships.create',
     'uses' => 'OrganizationRelationshipsController@create'
 ]);

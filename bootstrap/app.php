@@ -59,6 +59,10 @@ $app->middleware([
     App\Http\Middleware\HeadersMiddleware::class
 ]);
 
+$app->routeMiddleware([
+    'accept' => 'App\Http\Middleware\AcceptMiddleware',
+]);
+
 /*
 |--------------------------------------------------------------------------
 | Register Service Providers
