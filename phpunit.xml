@@ -30,6 +30,7 @@
         <env name="DB_USERNAME" value="root"/>
         <env name="DB_PASSWORD" value="pass4root"/>
         <env name="DB_DATABASE" value="pipedrive_test"/>
+        <env name="APP_DEBUG" value="true"/>
     </php>
 
 </phpunit>
