@@ -5,6 +5,7 @@ namespace App\Services;
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Exception\ClientException;
 use App\Interfaces\PipeDriveHttpClientInterface;
 use GuzzleHttp\Promise;
 
@@ -36,16 +37,23 @@ class PipeDriveHttpClient implements  PipeDriveHttpClientInterface
     }
 
     /**
-     * Make a single request to PIPEDRIVE API
      * @param $endpoint
      * @param array $properties
      * @param string $method
      * @return mixed
+     * @throws \Exception
      */
     public function request($endpoint, array $properties = [], $method = 'GET')
     {
         $requestProperties = array_merge_recursive($this->defaultProperties, $properties);
-        return $this->client->request($method, $endpoint, $requestProperties);
+        try {
+            $response = $this->client->request($method, $endpoint, $requestProperties);
+        } catch (ClientException $e) {
+            $body = json_decode($e->getResponse()->getBody(), true);
+            throw new \Exception($body['error'], $e->getCode());
+        }
+
+        return json_decode($response->getBody()->getContents(),true);
     }
 
     /**

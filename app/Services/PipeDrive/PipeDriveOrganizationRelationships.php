@@ -48,10 +48,11 @@ class PipeDriveOrganizationRelationships
     public function delete($id)
     {
         $response = $this->client->request(self::ENDPOINT. '/' . $id, [], 'DELETE');
-        $data = json_decode($response->getBody()->getContents(), true);
-        if ($data['success'] === true) {
+
+        if ($response['success'] === true) {
             return true;
         }
+
         return false;
     }
 
@@ -62,10 +63,6 @@ class PipeDriveOrganizationRelationships
      */
     public function getAll($org_id)
     {
-        $response = $this->client->request(self::ENDPOINT, ['query' => ['org_id'=>$org_id] ], 'GET');
-        $data = json_decode($response->getBody()->getContents(), true);
-        return $data;
+        return $this->client->request(self::ENDPOINT, ['query' => ['org_id'=>$org_id] ], 'GET');
     }
-
-
 }

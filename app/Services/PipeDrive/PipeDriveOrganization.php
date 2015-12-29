@@ -29,16 +29,15 @@ class PipeDriveOrganization
     {
         $exist = $this->findOne($data['name']);
         if (!$exist) {
-            $response = $this->client->request(self::ENDPOINT,
+            $result = $this->client->request(self::ENDPOINT,
                 ['json' =>
                     ['name' => $data['name']]
                 ], 'POST');
 
-            $data = json_decode($response->getBody()->getContents(), true);
-            if ($data['success'] === true) {
-                return $data['data'];
+            if ($result['success'] === true) {
+                return $result['data'];
             } else {
-                throw new \Exception($data['error']);
+                throw new \Exception($result['error']);
             }
         }
 
@@ -52,9 +51,9 @@ class PipeDriveOrganization
      */
     public function delete($id)
     {
-        $response = $this->client->request(self::ENDPOINT. '/' . $id, [], 'DELETE');
-        $data = json_decode($response->getBody()->getContents(), true);
-        if ($data['success'] === true) {
+        $result = $this->client->request(self::ENDPOINT. '/' . $id, [], 'DELETE');
+
+        if ($result['success'] === true) {
             return true;
         }
 
@@ -70,16 +69,15 @@ class PipeDriveOrganization
      */
     public function update($data, $id)
     {
-        $response = $this->client->request(self::ENDPOINT. '/' . $id,
+        $result = $this->client->request(self::ENDPOINT. '/' . $id,
             ['json' =>
                 ['name' => $data['name']]
             ], 'PUT');
 
-        $data = json_decode($response->getBody()->getContents(), true);
-        if ($data['success'] === true) {
+        if ($result['success'] === true) {
             return true;
         } else {
-            throw new \Exception($data['error']);
+            throw new \Exception($result['error']);
         }
     }
 
@@ -87,6 +85,7 @@ class PipeDriveOrganization
      * Find an organization by using full name, return first match
      * @param $term
      * @return bool
+     * @throws \Exception
      */
     public function findOne($term)
     {
@@ -96,10 +95,8 @@ class PipeDriveOrganization
             ]
         ]);
 
-        $data = json_decode($result->getBody()->getContents(),true);
-
-        if ($data['success'] === true) {
-            return $data['data'][0];
+        if ($result['success'] === true && !is_null($result['data'])) {
+            return $result['data'][0];
         }
 
         return false;
@@ -122,7 +119,7 @@ class PipeDriveOrganization
                 ]
             ]);
 
-            return $result->getBody()->getContents();
+            return $result;
         }
         if (is_array($terms)) {
             $requestConfig = [];
@@ -143,7 +140,6 @@ class PipeDriveOrganization
 
     public function getAll()
     {
-        $result = $this->client->request(self::ENDPOINT);
-        return json_decode($result->getBody()->getContents(), true);
+        return $this->client->request(self::ENDPOINT);
     }
 }

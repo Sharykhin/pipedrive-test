@@ -103,7 +103,7 @@ class OrganizationsController extends ApiController
             DB::commit();
         } catch(\Exception $e) {
             DB::rollBack();
-            return $this->failResponse($e->getMessage());
+            return $this->setStatusCode($e->getCode())->failResponse($e->getMessage());
         }
 
 
