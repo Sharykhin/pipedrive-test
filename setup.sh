@@ -35,3 +35,4 @@ cp .env.example .env
 php artisan migrate --force
 php artisan vendor:publish
 php artisan key:generate
+php artisan serve
