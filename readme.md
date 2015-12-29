@@ -3,7 +3,7 @@
 ### Environment
 Ubuntu 14.04  
 php 5.5  
-mysql 5.6  
+mysql 5.5  
 
 ### Description
 For implementation test task there was user [Lumen](https://lumen.laravel.com) framework.
