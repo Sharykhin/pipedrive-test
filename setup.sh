@@ -1,6 +1,8 @@
 echo "Provisioning virtual machine..."
 sudo apt-get -y update
 
+sudo apt-get install software-properties-common
+
 echo "Installing vim"
 sudo apt-get -y install vim
 
@@ -51,5 +53,3 @@ cd /var/www/
 composer install
 cp .env.example .env
 php artisan migrate --force
-php artisan vendor:publish
-php artisan key:generate
