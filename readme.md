@@ -40,4 +40,17 @@ Create an organization (on pipedrive as well)
 ```
 curl -XPOST http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json" --header "Accept: application/json" -d '{"name":"Banana"}'
 ```
+Get an organization by id
+```
+curl -XGET http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
+```
 
+Delete an organization by id
+```
+curl -XDELETE http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
+```
+
+Delete all organizations
+```
+curl -XGET http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json"
+```
