@@ -10,13 +10,13 @@ class OrganizationRelationship extends Model
 
     public $timestamps = false;
 
-    public function organization()
+    public function org_id()
     {
-        return $this->belongsTo('App\Models\Organization', 'org_id', 'id');
+        return $this->belongsTo('App\Models\Organization', 'org_id', 'id')->select(['id','name','created_at']);
     }
 
-    public function linked()
+    public function linked_org_id()
     {
-        return $this->belongsTo('App\Models\Organization', 'linked_org_id', 'id');
+        return $this->belongsTo('App\Models\Organization', 'linked_org_id', 'id')->select(['id','name','created_at']);
     }
 }

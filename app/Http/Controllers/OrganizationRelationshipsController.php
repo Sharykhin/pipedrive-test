@@ -39,9 +39,22 @@ class OrganizationRelationshipsController extends ApiController
         $this->orgRelPipeDriveService = $orgRelPipeDriveService;
     }
 
-    public function index()
+    public function index(Request $request)
     {
+        $validator = Validator::make($request->all(), [
+            'org_id' => 'required',
+        ], [
+            'org_id.required' => 'Missing required org_id'
+        ]);
 
+        if ($validator->fails()) {
+            return $this->setStatusCode(400)->failResponse($validator->getMessageBag()->get('org_id')[0]);
+        }
+        $data = OrganizationRelationship::with('org_id','linked_org_id')
+            ->where('org_id','=',$request->input('org_id'))
+            ->get();
+
+        return $this->successResponse($data);
     }
 
     /*
@@ -75,7 +88,7 @@ class OrganizationRelationshipsController extends ApiController
         ]);
 
         if ($validator->fails()) {
-            return $this->failResponse($validator->errors());
+            return $this->setStatusCode(400)->failResponse($validator->errors());
         }
         // initialize arrays for organization and relationships for storing in local database and pipedrive
         $orgs = [];
