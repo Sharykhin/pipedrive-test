@@ -54,3 +54,8 @@ Delete all organizations
 ```
 curl -XGET http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json"
 ```
+
+### Create relationship:
+```
+curl -XPOST http://192.168.55.55/api/v1/organizationRelationships --header "Content-Type: application/json" --header "Accept: application/json" -d '{"org_name":"Paradise Island", "daughters":[{"org_name":"Banana tree", "daughters":[{"org_name":"Yellow Banana"},{"org_name":"Brown Banana"},{"org_name":"Green Banana"}]},{"org_name":"Nestle"}]}'
+```
