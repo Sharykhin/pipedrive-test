@@ -21,3 +21,13 @@ vagrant up
 
 If you don't have Vagrant, go to the [Vagrant site](https://www.vagrantup.com/) and install it
 
+### testing
+
+Open browser http://192.168.55.55/
+
+Requests:  
+GET http://192.168.55.55/api/v1/test
+
+GET http://192.168.55.55/api/v1/organizations  
+POST http://192.168.55.55/api/v1/organizations   
+DELETE http://192.168.55.55/api/v1/organizations  
