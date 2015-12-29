@@ -23,11 +23,21 @@ If you don't have Vagrant, go to the [Vagrant site](https://www.vagrantup.com/) 
 
 ### testing
 
-Open browser http://192.168.55.55/
+For running tests use the following command:
+```
+vagrant ssh -c 'cd /var/www && ./vendor/bin/phpunit tests/ --verbose'
+```
 
 Requests:  
+
 GET http://192.168.55.55/api/v1/test
 
-GET http://192.168.55.55/api/v1/organizations  
-POST http://192.168.55.55/api/v1/organizations   
-DELETE http://192.168.55.55/api/v1/organizations  
+Get all organizations
+```
+curl -XGET http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json"
+```
+Create an organization (on pipedrive as well)
+```
+curl -XPOST http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json" --header "Accept: application/json" -d '{"name":"Banana"}'
+```
+
