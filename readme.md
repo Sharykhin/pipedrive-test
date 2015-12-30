@@ -6,7 +6,7 @@ php 5.5
 mysql 5.5  
 
 ### Description
-For implementation test task there was user [Lumen](https://lumen.laravel.com) framework.
+There was used [Lumen](https://lumen.laravel.com) framework.
 
 ### Usage
 make clone of this repository:
