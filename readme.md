@@ -313,7 +313,24 @@ Example
 ```
 curl -XGET http://192.168.55.55/api/v1/organizationRelationships?org_id=1 --header "Content-Type: application/json"
 ```
-#### Remove all data
+
+**Remove all data**
+```
+GET /api/v1/clearAll
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "message": "All data has been removed"
+  },
+  "error": null
+}
+```
+
+Example
 ```
 curl -XGET http://192.168.55.55/api/v1/clearAll --header "Content-Type: application/json"
 ```
