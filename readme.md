@@ -182,12 +182,134 @@ Example
 curl -XGET http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json"
 ```
 
-#### Create relationship:
+**Create relationship**
+```
+POST /api/v1/organizationRelationships
+```
+
+Input
+```
+{
+    "org_name": "Paradise Island",
+    "daughters": [
+        {
+            "org_name": "Banana tree",
+            "daughters": [
+                {"org_name": "Yellow Banana"},
+                {"org_name": "Brown Banana"},
+                {"org_name": "Green Banana"}
+            ]
+        },
+        {
+            "org_name":"Nestle"
+        }
+    ]
+}
+```
+
+Response
+```
+{
+  "success": true,
+  "data": [
+    {
+      "id": 139,
+      "type": "parent",
+      "rel_owner_org_id": {
+        "name": "Paradise Island",
+        "people_count": 0,
+        "owner_id": 1020435,
+        "cc_email": "somefakecompony@pipedrivemail.com",
+        "value": 305
+      },
+      "rel_linked_org_id": {
+        "name": "Banana tree",
+        "people_count": 0,
+        "owner_id": 1020435,
+        "cc_email": "somefakecompony@pipedrivemail.com",
+        "value": 306
+      },
+      "add_time": "2015-12-30 13:31:46",
+      "update_time": null,
+      "active_flag": true
+    },
+    {
+      "id": 143,
+      "type": "parent",
+      "rel_owner_org_id": {
+        "name": "Paradise Island",
+        "people_count": 0,
+        "owner_id": 1020435,
+        "cc_email": "somefakecompony@pipedrivemail.com",
+        "value": 305
+      },
+      "rel_linked_org_id": {
+        "name": "Nestle",
+        "people_count": 0,
+        "owner_id": 1020435,
+        "cc_email": "somefakecompony@pipedrivemail.com",
+        "value": 310
+      },
+      "add_time": "2015-12-30 13:31:47",
+      "update_time": null,
+      "active_flag": true
+    }
+  ],
+  "error": null
+}
+```
+
+Example
+
 ```
 curl -XPOST http://192.168.55.55/api/v1/organizationRelationships --header "Content-Type: application/json" --header "Accept: application/json" -d '{"org_name":"Paradise Island", "daughters":[{"org_name":"Banana tree", "daughters":[{"org_name":"Yellow Banana"},{"org_name":"Brown Banana"},{"org_name":"Green Banana"}]},{"org_name":"Nestle"}]}'
 ```
 
-#### Get all relationships by organization id
+**Get all relationships by organization id**
+```
+GET  /api/v1/organizationRelationships?org_id=:id
+```
+
+Response
+```
+{
+  "success": true,
+  "data": [
+    {
+      "id": "1",
+      "org_id": {
+        "id": "2",
+        "name": "Paradise Island",
+        "created_at": "2015-12-30 13:31:03"
+      },
+      "type": "parent",
+      "linked_org_id": {
+        "id": "3",
+        "name": "Banana tree",
+        "created_at": "2015-12-30 13:31:11"
+      }
+    },
+    {
+      "id": "5",
+      "org_id": {
+        "id": "2",
+        "name": "Paradise Island",
+        "created_at": "2015-12-30 13:31:03"
+      },
+      "type": "parent",
+      "linked_org_id": {
+        "id": "7",
+        "name": "Nestle",
+        "created_at": "2015-12-30 13:31:40"
+      }
+    }
+  ],
+  "error": null
+}
+```
+
+Example
+
 ```
 curl -XGET http://192.168.55.55/api/v1/organizationRelationships?org_id=1 --header "Content-Type: application/json"
 ```
