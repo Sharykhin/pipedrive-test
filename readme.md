@@ -21,7 +21,7 @@ vagrant up
 
 If you don't have Vagrant, go to the [Vagrant site](https://www.vagrantup.com/) and install it
 
-### testing
+### Testing
 
 For running tests use the following command:
 ```
