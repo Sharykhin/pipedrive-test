@@ -28,9 +28,9 @@ For running tests use the following command:
 vagrant ssh -c 'cd /var/www && ./vendor/bin/phpunit tests/ --verbose'
 ```
 
-Requests:  
+### API Requests:  
 
-GET http://192.168.55.55/api/v1/test
+test: http://192.168.55.55/api/v1/test
 
 **Get all organizations**
 ```
@@ -84,12 +84,79 @@ Example
 ```
 curl -XPOST http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json" --header "Accept: application/json" -d '{"name":"Banana"}'
 ```
-Get an organization by id
+
+**Get an organization by id**
+```
+GET /api/v1/organizations/:id
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "id": "1",
+    "name": "Organization Name",
+    "created_at": "2015-12-30 13:19:00",
+    "updated_at": "2015-12-30 13:19:00"
+  },
+  "error": null
+}
+```
+
+Example
 ```
 curl -XGET http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
 ```
 
-Delete an organization by id
+**Update an organization by id**
+```
+PUT /api/v1/organizations/:id
+```
+
+Input
+```
+{
+    "name":"Organization Name Changed"        
+}
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "id": "1",
+    "name": "Organization Name Changed",
+    "created_at": "2015-12-30 13:19:00",
+    "updated_at": "2015-12-30 13:23:45"
+  },
+  "error": null
+}
+```
+
+Example
+```
+curl -XPUT http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json" --header "Accept: application/json" -d '{"name":"Banana Tree"}'
+```
+
+**Delete an organization by id**
+```
+DELETE /api/v1/organizations/:id
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "id": "1"
+  },
+  "error": null
+}
+```
+
+Example
 ```
 curl -XDELETE http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
 ```
