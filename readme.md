@@ -314,6 +314,28 @@ Example
 curl -XGET http://192.168.55.55/api/v1/organizationRelationships?org_id=1 --header "Content-Type: application/json"
 ```
 
+**Remove all relationships**
+```
+DELETE /api/v1/organizationRelationships
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "message": "All organization relationships were deleted"
+  },
+  "error": null
+}
+```
+
+Example:
+```
+curl -XDELETE http://192.168.55.55/api/v1/organizationRelationships --header "Content-Type: application/json"
+```
+
+
 **Remove all data**
 ```
 GET /api/v1/clearAll
