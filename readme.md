@@ -161,7 +161,23 @@ Example
 curl -XDELETE http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
 ```
 
-Delete all organizations
+***Delete all organizations***
+```
+DELETE /api/v1/organizations
+```
+
+Response
+```
+{
+  "success": true,
+  "data": {
+    "message": "All organization were deleted"
+  },
+  "error": null
+}
+```
+
+Example
 ```
 curl -XGET http://192.168.55.55/api/v1/organizations --header "Content-Type: application/json"
 ```
