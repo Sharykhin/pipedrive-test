@@ -161,7 +161,7 @@ Example
 curl -XDELETE http://192.168.55.55/api/v1/organizations/1 --header "Content-Type: application/json"
 ```
 
-***Delete all organizations***
+**Delete all organizations**
 ```
 DELETE /api/v1/organizations
 ```
