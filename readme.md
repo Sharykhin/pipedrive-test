@@ -9,11 +9,11 @@ mysql 5.5
 There was used [Lumen](https://lumen.laravel.com) framework.
 
 ### Usage
-make clone of this repository:
+Step one: make clone of this repository:
 ```
 git clone https://github.com/Sharykhin/pipedrive-test.git
 ```
-run vagrant
+Step two: run vagrant
 ```
 cd pipedrive-test
 vagrant up
